@@ -115,10 +115,7 @@ function saveToSpreadsheet(userId, mealType, answer) {
 
   // すでに同じ日付とユーザーIDの行が存在するかどうかを確認する
   for (let i = 1; i <= lastRow; i++) {
-    const dateCellValue = ss.getRange(i, 1).getValue();
-    const userIdCellValue = ss.getRange(i, 2).getValue();
-    
-    if (dateCellValue.toISOString().slice(0, 10) === today.toISOString().slice(0, 10) && userIdCellValue === userId) {
+    if (ss.getRange(i, 2).getValue() === userId) {
       existingRow = i;
       break;
     }
@@ -173,22 +170,19 @@ function sendSummary() {
 
   data = ss.getRange(1, 1, lastRow, 4).getValues();
   data.forEach(row => {
-    const dateCellValue = row[0];
-    if (dateCellValue.toISOString().slice(0, 10) === today.toISOString().slice(0, 10)) {
-      const userId = row[1];
-      const dinnerAnswer = row[2];
-      const lunchAnswer = row[3];
-      let userName = USER_NAMES[userId];
+    const userId = row[1];
+    const dinnerAnswer = row[2];
+    const lunchAnswer = row[3];
+    let userName = USER_NAMES[userId];
 
-      if (!userData[userId]) {
-        userData[userId] = {};
-      }
-      let message = `${userName} → 夜ご飯：${dinnerAnswer}`;
-      if (isWeekendOrHoliday) {
-        message += ` / お昼ご飯：${lunchAnswer}`; // 週末または休日の場合、昼ご飯の回答を追加
-      }
-      summaryMessage += `${message}\n`;
+    if (!userData[userId]) {
+      userData[userId] = {};
     }
+    let message = `${userName} → 夜ご飯：${dinnerAnswer}`;
+    if (isWeekendOrHoliday) {
+      message += ` / お昼ご飯：${lunchAnswer}`;
+    }
+    summaryMessage += `${message}\n`;
   });
 
   summaryMessage += "\n修正がある場合は直接ご連絡ください！";
@@ -227,4 +221,11 @@ function isHoliday(date) {
   ];
 
   return holidays.some(holiday => date.getMonth() === holiday.month && date.getDate() === holiday.day);
+}
+
+/**
+ * スプレッドシートのデータを削除する
+ */
+function deleteData() {
+  sheet.deleteRows(1, lastRow - 1);
 }
