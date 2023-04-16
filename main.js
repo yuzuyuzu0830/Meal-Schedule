@@ -227,5 +227,7 @@ function isHoliday(date) {
  * スプレッドシートのデータを削除する
  */
 function deleteData() {
-  sheet.deleteRows(1, lastRow - 1);
+  if (lastRow > 0) {
+    sheet.deleteRows(1, lastRow);
+  }
 }
